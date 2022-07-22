@@ -10,7 +10,7 @@
 # 本地运行
 ### 克隆项目到本地
 ```
-$ git clone 
+$ git clone https://gitee.com/starses/bilibili-video.git 
 $ npm i
 ```
 
