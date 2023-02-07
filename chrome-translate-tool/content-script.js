@@ -4,7 +4,7 @@
 翻译功能思路：
 1.先用js创建一个div元素，他的innerHTML是翻译面板的HTML内容，把这个div挂载在页面上，但是默认是隐藏的（opacity:0），只有当用户选中了内容释放鼠标后才会显示
 这个翻译面板（给div元素添加一个class，设置该状态的样式为opacity:1;）到这一步为止，显示在网页上的翻译面板的静态样式已经确定好。
-2.翻译使用的是免费接口 (https://api.66mz8.com/api/translation.php?info=这里是需要翻译的内容')
+2.翻译使用的是免费接口 (https://v.api.aa1.cn/api/api-fanyi-yd/index.php?msg=这里是需要翻译的内容&type=3')
 接口中： sl = source language = 原文本内容的语言类型；tl = target language = 翻译后的内容的语言类型；q = 需要翻译的内容
 3.监听鼠标的onmouseup事件，这个是当释放鼠标时会触发的，然后，通过webAPI中的 window.getSelection().toString() 获取到用户选中的
 内容，如果用户没有选中任何内容，则return出去后续不做任何反应，如果有内容，则调用封装好的翻译函数，把选中的内容当作内容传递进去，把选中的内容和翻译好的内容
@@ -91,44 +91,20 @@ Panel.prototype.translate = function (raw) {
     // this.source.innerText = raw
     //翻译后的文本内容(由于获取到翻译后的内容是一个异步过程,此时还没有开始翻译,先把翻译后的文本设置为...,后面等异步完成,获取到翻译后的内容后,再重新把内容插入进去)
     this.dest.innerText = '...'
+    fetch(`https://v.api.aa1.cn/api/api-fanyi-yd/index.php?msg=${raw}&type=3`)
+        .then(res => res.json())
+        .then(res => {
+            //异步完成后,把获取到的已翻译完成的译文内容插入到翻译面板中
 
-    //用户选中的需要翻译的语言 如需要把英文翻译成中文,这里指的就是英文
-    let slValue = 'en'
-    //需要翻译成的语言 如需要把英文翻译成中文,这里指的就是中文
-    let tlValue = 'zh-Hans'
-    // })
+            // var data = JSON.parse(res);
+            console.log(res.text);
 
-    //查看用户是否已经设置了语言类型
-    chrome.storage.sync.get(['sl', 'tl'], (result) => {
-        if (result.sl) {
-            slValue = result.sl.value
-            this.container.querySelector('.source .title').innerText = result.sl.key
-        }
-
-        if (result.tl) {
-            tlValue = result.tl.value
-            this.container.querySelector('.dest .title').innerText = result.tl.key
-        }
+            this.dest.innerText = res.text;
 
 
+        })
 
 
-        // 百度翻译的接口
-        // 先发送识别语言的接口
-        fetch(`https://api.66mz8.com/api/translation.php?info=${raw}`)
-            .then(res => res.json())
-            .then(res => {
-                //异步完成后,把获取到的已翻译完成的译文内容插入到翻译面板中
-                
-                // var data = JSON.parse(res);    
-                console.log(res.fanyi);
-                this.dest.innerText = res.fanyi
-                
-
-            })
-        
-            
-    })
 }
 
 //翻译面板在网页中显示的位置 传入的参数是一个pos对象,其中包含x,y
